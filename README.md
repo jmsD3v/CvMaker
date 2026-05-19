@@ -22,7 +22,7 @@ Subí el aviso laboral → la app lee tu perfil completo → genera `CV.docx` + 
 ## Stack
 
 ```
-Frontend          Next.js 15 · TypeScript · Tailwind CSS · pnpm · Vercel
+Frontend          Next.js 16.2.6 · TypeScript · Tailwind CSS · pnpm · Vercel
 Backend           Python FastAPI · Render (free tier)
 Base de datos     Supabase (PostgreSQL + Auth + Storage)
 IA                Google Gemini Flash 2.0 (free tier — 1M tokens/día)
