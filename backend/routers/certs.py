@@ -7,6 +7,7 @@ from slowapi.util import get_remote_address
 from supabase import create_client
 from models.schemas import ExtractCertRequest, ExtractedCert
 from services.extractor import extract_cert
+from services.cert_validation import validate_cert_request
 from services.auth import get_current_user
 
 router = APIRouter()
@@ -27,6 +28,7 @@ async def extract_certification(
 ):
     if user_id != body.user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
+    suffix = validate_cert_request(user_id, body.file_url, body.file_type)
 
     signed = supabase.storage.from_("certifications").create_signed_url(
         body.file_url, 300
@@ -38,8 +40,8 @@ async def extract_certification(
         response.raise_for_status()
         content = response.content
 
-    ext = body.file_type
-    with tempfile.NamedTemporaryFile(suffix=f".{ext}", delete=False) as tmp:
+    ext = suffix.lstrip(".")
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
         tmp.write(content)
         tmp_path = tmp.name
 
@@ -54,6 +56,6 @@ async def extract_certification(
         "issued_date": cert_data.get("issued_date"),
         "category": cert_data.get("category", "other"),
         "raw_text": raw_text,
-    }).eq("id", body.cert_id).execute()
+    }).eq("id", body.cert_id).eq("user_id", user_id).execute()
 
     return ExtractedCert(**cert_data)
